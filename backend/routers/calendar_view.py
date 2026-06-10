@@ -77,6 +77,7 @@ async def month_view(
             "active": "calendar",
             "provider": ai.get_provider(db),
             "year": year,
+            "month": month,
             "month_name": first.strftime("%B"),
             "weeks": weeks,
             "today": today,

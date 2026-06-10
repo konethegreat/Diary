@@ -12,7 +12,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from .auth import GatekeeperMiddleware, router as auth_router
 from .config import settings
 from .database import SessionLocal, init_db
-from .routers import brief, calendar_view, chat, diary, reminders, review
+from .routers import brief, calendar_view, chat, coach, diary, export, reminders, review, topics
 from .services import brief as brief_service
 from .templating import templates
 
@@ -64,6 +64,9 @@ app.include_router(reminders.router)
 app.include_router(brief.router)
 app.include_router(calendar_view.router)
 app.include_router(review.router)
+app.include_router(topics.router)
+app.include_router(coach.router)
+app.include_router(export.router)
 
 
 @app.post("/api/theme")

@@ -9,6 +9,9 @@ by hand — only HTMX from CDN and a minimal service worker for PWA install).
 - **Frontend:** Jinja2 templates + HTMX, single CSS file, PWA
 - **AI:** Anthropic Claude API ↔ local Ollama, toggled at runtime from the UI
 - **Embeddings:** Ollama `nomic-embed-text`, stored as float32 BLOBs
+- **PDF export:** fpdf2 with core fonts only — day/month/all/topic downloads
+  under `/export/`, plus topic summaries and coach sessions rendered from
+  the same markdown the web UI shows
 
 ## Run
 
@@ -48,4 +51,9 @@ python run.py                                     # http://localhost:8000
   not JSON. JSON is reserved for future programmatic API needs.
 - AI failures must degrade gracefully: entries always save even if
   polish/embedding fails; errors render inline in the affected partial.
+- AI output that should survive restarts (weekly reviews, topic summaries,
+  coach sessions, the coach's profile memory) is cached in `Setting` rows —
+  see the key namespaces in `backend/CLAUDE.md`. Regenerating overwrites.
+- Topics: six presets (Work, Personal, Discovery, Growth, Failure, Struggle)
+  are seeded at startup; users add custom ones from the new-entry form.
 - Keep all code Python. Do not introduce Node, npm, or hand-written JS.

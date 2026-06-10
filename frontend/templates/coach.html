@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Coach — {{ month_label }}{% endblock %}
+
+{% block navextra %}
+  {% include "partials/provider_toggle.html" %}
+{% endblock %}
+
+{% block content %}
+<div class="day-nav">
+  <a class="arrow" href="/coach?ym={{ prev_ym }}" title="Previous month">←</a>
+  <h1>Coach <span class="sub">{{ month_label }} · {{ entry_count }} entr{{ "y" if entry_count == 1 else "ies" }}</span></h1>
+  {% if next_ym %}
+  <a class="arrow" href="/coach?ym={{ next_ym }}" title="Next month">→</a>
+  {% else %}
+  <span class="arrow" style="visibility:hidden">→</span>
+  {% endif %}
+</div>
+
+<div class="grid">
+  <div class="stack">
+    <div class="card">
+      <h3>🎓 Monthly session
+        <button class="btn-ghost btn-sm btn-busy" style="margin-left:auto"
+                hx-post="/api/coach" hx-vals='{"ym": "{{ ym }}"}'
+                hx-target="#coach-body" hx-swap="innerHTML">
+          {{ "↻ Regenerate" if advice else "✦ Coach me" }} <span class="htmx-indicator spinner"></span>
+        </button>
+      </h3>
+      <div id="coach-body">
+        {% include "partials/coach_body.html" %}
+      </div>
+    </div>
+  </div>
+
+  <div class="stack">
+    <div class="card">
+      <h3>🧠 Your coach remembers</h3>
+      <div id="coach-profile">
+        {% if profile %}
+        <div class="entry-body">{{ profile | markdown | safe }}</div>
+        {% else %}
+        <p class="empty">Nothing yet. After your first session the coach starts keeping notes about who you are.</p>
+        {% endif %}
+      </div>
+      <p class="meta" style="margin-top:10px">These notes update automatically after every session and carry over month to month, so advice gets more personal over time.</p>
+    </div>
+  </div>
+</div>
+{% endblock %}

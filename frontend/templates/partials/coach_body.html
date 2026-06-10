@@ -1,0 +1,13 @@
+{% if error %}
+  <p class="error">{{ error }}</p>
+{% elif advice %}
+  <div class="entry-body">{{ advice | markdown | safe }}</div>
+{% else %}
+  <p class="empty">No session for {{ month_label }} yet. Hit ✦ Coach me — ideally at the end of the month — and the coach reads everything you wrote.</p>
+{% endif %}
+
+{% if oob_profile %}
+<div id="coach-profile" hx-swap-oob="true">
+  <div class="entry-body">{{ oob_profile | markdown | safe }}</div>
+</div>
+{% endif %}

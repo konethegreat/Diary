@@ -1,0 +1,11 @@
+{% if error %}
+  <p class="error">{{ error }}</p>
+{% elif summary %}
+  <div class="entry-body">{{ summary | markdown | safe }}</div>
+  <div class="row" style="margin-top:10px">
+    <a class="btn-ghost btn-sm" style="text-decoration:none"
+       href="/export/topic/{{ topic.id }}.pdf?scope={{ scope }}">⤓ Download as PDF · {{ topic.name }}, {{ period_label }}</a>
+  </div>
+{% else %}
+  <p class="empty">No summary yet — pick a topic and hit ✦ Summarize.</p>
+{% endif %}

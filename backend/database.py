@@ -41,11 +41,37 @@ def get_db():
         db.close()
 
 
+# Built-in topics seeded on first run; custom topics are added from the UI.
+PRESET_TOPICS = [
+    ("Work", "#e8833a"),
+    ("Personal", "#7c6cf0"),
+    ("Discovery", "#3aa6e8"),
+    ("Growth", "#3ec97e"),
+    ("Failure", "#e85d75"),
+    ("Struggle", "#c9a23e"),
+]
+
+
 def init_db() -> None:
     from . import models  # noqa: F401
 
     Base.metadata.create_all(engine)
     _migrate()
+    _seed_topics()
+
+
+def _seed_topics() -> None:
+    from .models import Topic
+
+    db = SessionLocal()
+    try:
+        existing = {t.name.lower() for t in db.query(Topic).all()}
+        for name, color in PRESET_TOPICS:
+            if name.lower() not in existing:
+                db.add(Topic(name=name, color=color))
+        db.commit()
+    finally:
+        db.close()
 
 
 def _migrate() -> None:

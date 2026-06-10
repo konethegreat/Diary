@@ -10,6 +10,8 @@
   <a class="arrow day-nav-arrow btn-icon" style="text-decoration:none" href="/calendar?y={{ prev_y }}&m={{ prev_m }}" title="Previous month">←</a>
   <h1>{{ month_name }} <span style="color:var(--text-dim)">{{ year }}</span></h1>
   <a class="btn-ghost btn-sm" style="text-decoration:none" href="/calendar">Today</a>
+  <a class="btn-ghost btn-sm" style="text-decoration:none" href="/export/month/{{ year }}/{{ month }}.pdf"
+     title="Download {{ month_name }} {{ year }} as PDF">⤓ PDF</a>
   <a class="arrow btn-icon" style="text-decoration:none" href="/calendar?y={{ next_y }}&m={{ next_m }}" title="Next month">→</a>
 </div>
 

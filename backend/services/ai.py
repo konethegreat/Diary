@@ -121,6 +121,52 @@ async def weekly_review(db: Session, entries_text: str) -> str:
     return await complete(db, REVIEW_SYSTEM, entries_text, max_tokens=800)
 
 
+TOPIC_SUMMARY_SYSTEM = """You are summarizing one themed section of a personal
+diary (e.g. Work, Growth, Failure). Given the entries for that topic, write a
+short markdown summary: 1) a 2–3 sentence overview of what this thread of life
+looked like in the period, 2) **Highlights** (bullets, quote dates),
+3) **Open threads** — things started but not finished, 4) one trend you notice
+over time. Be specific and faithful to the entries; never invent. Max ~250 words."""
+
+
+async def topic_summary(db: Session, topic_name: str, period_label: str, corpus: str) -> str:
+    prompt = f"Topic: {topic_name}\nPeriod: {period_label}\n\nEntries:\n\n{corpus}"
+    return await complete(db, TOPIC_SUMMARY_SYSTEM, prompt, max_tokens=800)
+
+
+COACH_SYSTEM = """You are the user's long-term personal coach. You have two
+inputs: your private profile notes about them (built up over previous months)
+and their diary entries for one month. Write their monthly coaching session in
+markdown: 1) a warm, candid 3–4 sentence reflection on the month that shows you
+know who they are, 2) **Patterns** — what kept showing up, good and bad,
+3) **Advice** — 2–3 concrete, specific recommendations tied to what they wrote,
+4) **One challenge** for next month, small and measurable. Speak directly to
+them ("you"). Quote dates when referencing entries. Max ~350 words."""
+
+
+async def coach_advice(db: Session, profile: str, month_label: str, corpus: str) -> str:
+    prompt = (
+        f"Profile notes so far:\n{profile or '(first session — no notes yet)'}\n\n"
+        f"Month: {month_label}\n\nDiary entries:\n\n{corpus}"
+    )
+    return await complete(db, COACH_SYSTEM, prompt, max_tokens=1000)
+
+
+COACH_PROFILE_SYSTEM = """You maintain compact private profile notes about a
+diary author for their personal coach. Merge the existing notes with what this
+month's entries reveal: who they are, what they're working toward, recurring
+struggles, wins, habits, people and projects that matter. Drop stale details,
+keep it under 200 words, plain prose. Return ONLY the updated notes."""
+
+
+async def coach_update_profile(db: Session, profile: str, corpus: str) -> str:
+    prompt = (
+        f"Existing notes:\n{profile or '(none yet)'}\n\n"
+        f"This month's diary entries:\n\n{corpus}"
+    )
+    return await complete(db, COACH_PROFILE_SYSTEM, prompt, max_tokens=500)
+
+
 CHAT_SYSTEM = """You are the user's personal diary assistant. Answer their question
 using ONLY the diary excerpts provided as context. Quote dates when referencing
 entries. If the context doesn't contain the answer, say so plainly."""

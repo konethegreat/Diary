@@ -19,6 +19,10 @@
   {% if holiday %}
   <span class="chip holiday">🎉 {{ holiday }}</span>
   {% endif %}
+  {% if entries %}
+  <a class="chip" style="text-decoration:none" href="/export/day/{{ day.isoformat() }}.pdf"
+     title="Download this day as PDF">⤓ Day PDF</a>
+  {% endif %}
 </div>
 
 <div class="grid">

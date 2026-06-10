@@ -5,8 +5,10 @@
 - `templates/base.html` — shell: nav, fonts, htmx CDN, SW registration
 - `templates/diary.html` — daily view: brief, new-entry form, entries, reminders sidebar
 - `templates/chat.html` — RAG chat page
+- `templates/topics.html` — topic list + AI topic summary form + PDF export links
+- `templates/coach.html` — monthly AI coach: session + "coach remembers" profile card
 - `templates/login.html` — Google sign-in
-- `templates/partials/` — HTMX swap targets (entry_card, chat_message, reminder_list, brief, provider_toggle, topic_options)
+- `templates/partials/` — HTMX swap targets (entry_card, chat_message, reminder_list, brief, provider_toggle, topic_options, review_body, topic_summary, coach_body)
 - `static/app.css` — entire design system (tokens at top in `:root`)
 - `static/manifest.json`, `static/sw.js`, `static/icon.svg` — PWA
 
@@ -39,6 +41,11 @@ Motion follows Emil Kowalski's design-engineering principles:
   no client-side theme logic exists or should exist.
 - Server returns partials; a partial must render standalone with only the
   context its router provides.
+- `coach_body.html` updates the profile card in the other grid column via
+  `hx-swap-oob` — the oob block renders only when the router passes
+  `oob_profile`, so the full-page include stays inert.
+- PDF downloads are plain `<a href="/export/...">` links (no HTMX) so the
+  browser handles the file; style them as `.chip` or `.btn-ghost`.
 - Loading states: put `btn-busy` on the button and
   `<span class="htmx-indicator spinner"></span>` inside it.
 - New colors/spacing go in `:root` tokens first; never hardcode hex values

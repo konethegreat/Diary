@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Topics{% endblock %}
+
+{% block navextra %}
+  {% include "partials/provider_toggle.html" %}
+{% endblock %}
+
+{% block content %}
+<div class="day-nav">
+  <h1>Topics <span class="sub">{{ rows | length }} section{{ "" if rows | length == 1 else "s" }}</span></h1>
+</div>
+
+<div class="grid">
+  <div class="stack">
+    <div class="card">
+      <h3>✦ AI topic summary</h3>
+      <p class="meta" style="margin-bottom:12px">Pick a topic and a period — the AI reads those entries and writes a summary you can also download as a PDF.</p>
+      <form hx-post="/api/topics/summary" hx-target="#topic-summary" hx-swap="innerHTML">
+        <div class="row">
+          <div style="flex:1">
+            <label>Topic</label>
+            <select name="topic_id">
+              {% for r in rows %}
+              <option value="{{ r.t.id }}">{{ r.t.name }} ({{ r.count }})</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div style="width:215px">
+            <label>Period</label>
+            <select name="scope">
+              <option value="{{ month_value }}">This month · {{ month_label }}</option>
+              <option value="{{ last_month_value }}">Last month · {{ last_month_label }}</option>
+              <option value="all">All time</option>
+            </select>
+          </div>
+        </div>
+        <div class="row" style="margin-top:14px">
+          <button class="btn-busy">✦ Summarize <span class="htmx-indicator spinner"></span></button>
+        </div>
+      </form>
+      <div id="topic-summary" style="margin-top:16px">
+        {% include "partials/topic_summary.html" %}
+      </div>
+    </div>
+  </div>
+
+  <div class="stack">
+    <div class="card">
+      <h3>All topics</h3>
+      {% for r in rows %}
+      <div class="topic-row">
+        <span class="topic-pill">{{ r.t.name }}</span>
+        <span class="meta">{{ r.count }} entr{{ "y" if r.count == 1 else "ies" }}</span>
+        <a class="btn-ghost btn-sm" style="text-decoration:none"
+           href="/export/topic/{{ r.t.id }}.pdf?scope=all" title="Download all {{ r.t.name }} entries as PDF">⤓ PDF</a>
+      </div>
+      {% endfor %}
+      <p class="meta" style="margin-top:12px">Add custom topics from the new-entry form on the Today page.</p>
+    </div>
+
+    <div class="card">
+      <h3>⤓ Full export</h3>
+      <p class="meta" style="margin-bottom:12px">Every entry you've ever written, grouped by month.</p>
+      <a class="btn-ghost btn-sm" style="text-decoration:none" href="/export/all.pdf">⤓ Download everything (PDF)</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
