@@ -1,0 +1,13 @@
+{% for r in reminders %}
+<div class="reminder {{ 'done' if r.done }}">
+  <button class="check" hx-post="/api/reminders/{{ r.id }}/toggle"
+          hx-target="#reminder-list" hx-swap="innerHTML">✓</button>
+  <span class="txt">{{ r.text }}</span>
+  <span class="due">{{ r.due_date.strftime("%b %d") }}</span>
+  <button class="btn-danger btn-sm" style="padding:2px 8px"
+          hx-delete="/api/reminders/{{ r.id }}"
+          hx-target="#reminder-list" hx-swap="innerHTML">×</button>
+</div>
+{% else %}
+<p class="empty" style="padding:8px 0">Nothing pending. Nice.</p>
+{% endfor %}

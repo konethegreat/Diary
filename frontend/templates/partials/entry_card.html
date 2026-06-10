@@ -1,0 +1,22 @@
+<div class="card" id="entry-{{ e.id }}">
+  <h3>{{ e.title }}</h3>
+  <div class="meta">
+    <span>{{ e.created_at.strftime("%H:%M") }}</span>
+    {% if e.topic %}<span class="topic-pill">{{ e.topic.name }}</span>{% endif %}
+    {% if e.polished_text %}<span class="badge-polished">✦ polished</span>{% endif %}
+    {% if e.mood %}<span class="mood" title="AI mood score: {{ e.mood }}/5">{{ MOOD_EMOJI[e.mood] }}</span>{% endif %}
+  </div>
+  <div class="entry-body">{{ e.display_text | markdown | safe }}</div>
+  {% if error %}<p class="error">AI error: {{ error }}</p>{% endif %}
+  <div class="row" style="margin-top:10px">
+    <button class="btn-ghost btn-sm btn-busy"
+            hx-post="/api/entries/{{ e.id }}/polish"
+            hx-target="#entry-{{ e.id }}" hx-swap="outerHTML">
+      ✦ {{ "Re-polish" if e.polished_text else "Polish with AI" }} <span class="htmx-indicator spinner"></span>
+    </button>
+    <button class="btn-danger btn-sm"
+            hx-delete="/api/entries/{{ e.id }}"
+            hx-confirm="Delete this entry?"
+            hx-target="#entry-{{ e.id }}" hx-swap="outerHTML">Delete</button>
+  </div>
+</div>

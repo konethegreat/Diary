@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Calendar — {{ month_name }} {{ year }}{% endblock %}
+
+{% block navextra %}
+  {% include "partials/provider_toggle.html" %}
+{% endblock %}
+
+{% block content %}
+<div class="cal-head">
+  <a class="arrow day-nav-arrow btn-icon" style="text-decoration:none" href="/calendar?y={{ prev_y }}&m={{ prev_m }}" title="Previous month">←</a>
+  <h1>{{ month_name }} <span style="color:var(--text-dim)">{{ year }}</span></h1>
+  <a class="btn-ghost btn-sm" style="text-decoration:none" href="/calendar">Today</a>
+  <a class="arrow btn-icon" style="text-decoration:none" href="/calendar?y={{ next_y }}&m={{ next_m }}" title="Next month">→</a>
+</div>
+
+<div class="cal-grid">
+  {% for wd in weekdays %}<span class="wd">{{ wd }}</span>{% endfor %}
+
+  {% for week in weeks %}
+    {% for cell in week %}
+      {% if cell %}
+      <a class="cal-cell {{ 'today' if cell.date == today }}" href="/?d={{ cell.date.isoformat() }}">
+        <span class="num">{{ cell.date.day }}</span>
+        {% if cell.holiday %}<span class="hol">{{ cell.holiday }}</span>{% endif %}
+        <span class="marks">
+          {% for _ in range([cell.count, 3] | min) %}<span class="cal-dot"></span>{% endfor %}
+          {% if cell.has_reminders %}<span class="cal-dot rem"></span>{% endif %}
+          {% if cell.mood %}<span class="mood-mark">{{ MOOD_EMOJI[cell.mood] }}</span>{% endif %}
+        </span>
+      </a>
+      {% else %}
+      <span class="cal-cell empty"></span>
+      {% endif %}
+    {% endfor %}
+  {% endfor %}
+</div>
+
+<p class="meta" style="margin-top:18px;color:var(--text-dim);font-size:0.78rem">
+  <span class="cal-dot" style="display:inline-block"></span> entries &nbsp;
+  <span class="cal-dot rem" style="display:inline-block"></span> open reminders &nbsp; 🎉 public holidays ({{ year }})
+</p>
+{% endblock %}

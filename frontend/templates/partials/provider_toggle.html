@@ -1,0 +1,5 @@
+<span class="provider" id="provider-toggle" title="Click to switch AI provider"
+      hx-post="/api/provider" hx-target="#provider-toggle" hx-swap="outerHTML">
+  <span class="dot {{ provider }}"></span>
+  {{ "Claude API" if provider == "anthropic" else "Local (Ollama)" }}
+</span>

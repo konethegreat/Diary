@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Weekly review{% endblock %}
+
+{% block navextra %}
+  {% include "partials/provider_toggle.html" %}
+{% endblock %}
+
+{% block content %}
+<div class="day-nav">
+  <h1>Weekly review <span class="sub">last 7 days · {{ entry_count }} entr{{ "y" if entry_count == 1 else "ies" }}</span></h1>
+</div>
+
+<div class="grid">
+  <div class="stack">
+    <div class="card" id="review-card">
+      <h3>🪞 Reflection
+        <button class="btn-ghost btn-sm btn-busy" style="margin-left:auto"
+                hx-post="/api/review" hx-target="#review-body" hx-swap="innerHTML">
+          {{ "↻ Regenerate" if review else "✦ Generate" }} <span class="htmx-indicator spinner"></span>
+        </button>
+      </h3>
+      <div id="review-body">
+        {% include "partials/review_body.html" %}
+      </div>
+    </div>
+  </div>
+
+  <div class="stack">
+    <div class="card">
+      <h3>Mood · last 7 days</h3>
+      <div class="mood-bars">
+        {% for d in mood_days %}
+        <div class="mood-bar" title="{{ d.date.strftime('%A %b %d') }}{{ ' · ' + MOOD_EMOJI[d.mood] if d.mood }}">
+          <div class="bar {{ 'none' if not d.mood }}" style="height: {{ (d.mood or 1) * 20 }}%"></div>
+          <span class="lbl">{{ d.date.strftime("%a") }}</span>
+        </div>
+        {% endfor %}
+      </div>
+      <p class="meta" style="margin-top:12px">Moods are scored by AI when you polish an entry.</p>
+    </div>
+  </div>
+</div>
+{% endblock %}

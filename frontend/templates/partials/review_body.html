@@ -1,0 +1,7 @@
+{% if error %}
+  <p class="error">{{ error }}</p>
+{% elif review %}
+  <div class="entry-body">{{ review | markdown | safe }}</div>
+{% else %}
+  <p class="empty">No review yet for this week. Hit ✦ Generate and I'll reflect on your last 7 days.</p>
+{% endif %}

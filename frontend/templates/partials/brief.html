@@ -1,0 +1,13 @@
+<div class="card brief">
+  <h3>☀️ Morning brief
+    <button class="btn-ghost btn-sm btn-busy" style="margin-left:auto"
+            hx-get="/api/brief?force=true" hx-target="closest div.card" hx-swap="outerHTML">
+      ↻ Refresh <span class="htmx-indicator spinner"></span>
+    </button>
+  </h3>
+  {% if error %}
+    <p class="error">Couldn't generate the brief: {{ error }}</p>
+  {% else %}
+    <div class="entry-body">{{ content | markdown | safe }}</div>
+  {% endif %}
+</div>

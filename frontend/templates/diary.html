@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}Diary — {{ day.strftime("%b %d") }}{% endblock %}
+
+{% block navextra %}
+  {% include "partials/provider_toggle.html" %}
+{% endblock %}
+
+{% block content %}
+<div class="day-nav">
+  <a class="arrow" href="/?d={{ prev_day.isoformat() }}" title="Previous day">←</a>
+  <h1>{{ "Today" if day == today else day.strftime("%A") }} <span class="sub">{{ day.strftime("%B %d, %Y") }}</span></h1>
+  <a class="arrow" href="/?d={{ next_day.isoformat() }}" title="Next day">→</a>
+</div>
+
+<div class="chips">
+  {% if weather %}
+  <span class="chip">{{ weather.emoji }} {{ weather.label }} · {{ weather.temp_min }}–{{ weather.temp_max }}°C</span>
+  {% endif %}
+  {% if holiday %}
+  <span class="chip holiday">🎉 {{ holiday }}</span>
+  {% endif %}
+</div>
+
+<div class="grid">
+  <div class="stack">
+
+    {% if day == today %}
+    <!-- Morning brief, lazy-loaded -->
+    <div hx-get="/api/brief" hx-trigger="load" hx-swap="innerHTML">
+      <div class="card brief"><h3>☀️ Morning brief</h3><p class="meta"><span class="spinner"></span>&nbsp; Thinking…</p></div>
+    </div>
+    {% endif %}
+
+    <!-- New entry -->
+    <form class="card" hx-post="/api/entries" hx-target="#entries" hx-swap="beforeend" hx-on::after-request="if(event.detail.successful) this.reset()">
+      <h3>New entry</h3>
+      <input type="hidden" name="entry_date" value="{{ day.isoformat() }}">
+      <div class="row">
+        <div style="flex:1">
+          <label>Title</label>
+          <input name="title" placeholder="What was this about?">
+        </div>
+        <div style="width:185px">
+          <label>Topic</label>
+          <select name="topic_id" id="topic-select">
+            {% include "partials/topic_options.html" %}
+          </select>
+        </div>
+      </div>
+      <label>Brain dump — messy is fine, AI will polish it</label>
+      <textarea name="raw_text" required placeholder="Just type what happened…"></textarea>
+      <div class="row" style="margin-top:14px">
+        <button type="submit" class="btn-busy">Save entry <span class="htmx-indicator spinner"></span></button>
+        <input style="width:175px" name="name" placeholder="New topic…"
+               hx-post="/api/topics" hx-target="#topic-select" hx-swap="innerHTML"
+               hx-trigger="keyup[key=='Enter']" title="Press Enter to add a topic">
+      </div>
+    </form>
+
+    <!-- Entries -->
+    <div id="entries" class="stack">
+      {% for e in entries %}
+        {% include "partials/entry_card.html" %}
+      {% else %}
+        <p class="empty">No entries for this day yet.</p>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Sidebar -->
+  <div class="stack">
+    <div class="card">
+      <h3>✓ Reminders</h3>
+      <form class="row" style="margin-bottom:10px"
+            hx-post="/api/reminders" hx-target="#reminder-list" hx-swap="innerHTML"
+            hx-on::after-request="if(event.detail.successful) this.reset()">
+        <input type="hidden" name="due_date" value="{{ day.isoformat() }}">
+        <input name="text" required placeholder="Add a reminder…">
+        <button class="btn-sm">+</button>
+      </form>
+      <div id="reminder-list" hx-get="/api/reminders?d={{ day.isoformat() }}" hx-trigger="load" hx-swap="innerHTML"></div>
+    </div>
+
+    {% if memories %}
+    <div class="card">
+      <h3>🕰️ On this day</h3>
+      {% for m in memories %}
+      <div class="memory">
+        <span class="when">{{ m.entry_date.strftime("%Y") }}</span>
+        <div class="what"><strong>{{ m.title }}</strong> — {{ m.display_text | striptags | truncate(110) }}</div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if quote %}
+    <div class="card">
+      <p class="quote" style="margin:0">“{{ quote.text }}”
+        <span class="author">— {{ quote.author }}</span>
+      </p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

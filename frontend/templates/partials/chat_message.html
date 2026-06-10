@@ -1,0 +1,14 @@
+<div class="msg q">{{ question }}</div>
+<div class="msg a">
+  {% if error %}
+    <p class="error">AI error: {{ error }}</p>
+  {% else %}
+    {{ answer | markdown | safe }}
+    {% if sources %}
+    <div class="sources">
+      Sources:
+      {% for s in sources %}<span>{{ s.entry_date.isoformat() }} — {{ s.title }}{{ " · " if not loop.last }}</span>{% endfor %}
+    </div>
+    {% endif %}
+  {% endif %}
+</div>
