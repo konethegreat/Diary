@@ -1,5 +1,7 @@
-"""App assembly: middleware, routers, PWA files, theme, daily brief scheduler."""
+"""App assembly: middleware, routers, PWA files, theme, scheduler jobs
+(morning brief + push, month-end coach nudge)."""
 from contextlib import asynccontextmanager
+from datetime import date, timedelta
 
 import markdown as md
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -13,7 +15,7 @@ from .auth import GatekeeperMiddleware, router as auth_router
 from .config import settings
 from .database import SessionLocal, init_db
 from .routers import brief, calendar_view, chat, coach, diary, export, reminders, review, topics
-from .services import brief as brief_service
+from .services import brief as brief_service, notify
 from .templating import templates
 
 MOOD_EMOJI = {1: "😞", 2: "😕", 3: "😐", 4: "🙂", 5: "😄"}
@@ -22,11 +24,25 @@ MOOD_EMOJI = {1: "😞", 2: "😕", 3: "😐", 4: "🙂", 5: "😄"}
 async def _scheduled_brief() -> None:
     db = SessionLocal()
     try:
-        await brief_service.generate(db, force=True)
+        content = await brief_service.generate(db, force=True)
+        await notify.push("Morning brief", content, click_path="/", tags="sunny")
     except Exception:
         pass  # provider offline — UI will generate on demand
     finally:
         db.close()
+
+
+async def _coach_nudge() -> None:
+    """Evening of the last day of the month: time for the coaching session."""
+    today = date.today()
+    if (today + timedelta(days=1)).month == today.month:
+        return
+    await notify.push(
+        f"{today.strftime('%B')} is wrapping up",
+        "Your coach has read the whole month and is ready when you are.",
+        click_path="/coach",
+        tags="brain",
+    )
 
 
 @asynccontextmanager
@@ -34,6 +50,7 @@ async def lifespan(app: FastAPI):
     init_db()
     scheduler = AsyncIOScheduler()
     scheduler.add_job(_scheduled_brief, CronTrigger(hour=settings.BRIEF_HOUR, minute=0))
+    scheduler.add_job(_coach_nudge, CronTrigger(hour=18, minute=0))
     scheduler.start()
     yield
     scheduler.shutdown(wait=False)

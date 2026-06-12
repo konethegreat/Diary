@@ -36,8 +36,26 @@ python -m venv .venv && .venv/Scripts/activate   # Windows
 pip install -r requirements.txt
 # .env must exist with ALLOWED_EMAIL and a random SECRET_KEY —
 # the app refuses to start without them (see backend/config.py)
-python run.py                                     # http://localhost:8000
+python run.py --dev                               # http://localhost:8000
 ```
+
+## Deployment (current)
+
+Runs permanently on the owner's Windows laptop:
+
+- **Windows scheduled task "Diary"** starts `.venv\Scripts\pythonw.exe run.py`
+  at logon (no console; logs append to `data/server.log`). `--dev` enables
+  uvicorn auto-reload for development; without it the server is headless.
+- **Tailscale** provides phone access: `tailscale serve` fronts
+  127.0.0.1:8000 with HTTPS at the machine's `…ts.net` address. The diary is
+  never exposed to the public internet. NOTE: requests proxied by tailscale
+  serve arrive from loopback, so AUTH_MODE=dev treats the whole tailnet as
+  the owner — fine while the tailnet is single-person; switch to OAuth
+  before inviting family.
+- **Push notifications** via ntfy.sh (`backend/services/notify.py`):
+  morning brief at BRIEF_HOUR and a coach nudge at 18:00 on the last day of
+  the month. `NTFY_TOPIC` in `.env` is the secret; `APP_URL` is the ts.net
+  address used for notification click-through.
 
 ## Critical invariants — do not break
 

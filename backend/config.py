@@ -29,6 +29,14 @@ class Settings:
 
     BRIEF_HOUR: int = int(os.getenv("BRIEF_HOUR", "6"))
 
+    # Phone push notifications via ntfy (optional). NTFY_TOPIC is the secret:
+    # anyone who knows it can read the notifications — use a long random name.
+    NTFY_TOPIC: str = os.getenv("NTFY_TOPIC", "")
+    NTFY_SERVER: str = os.getenv("NTFY_SERVER", "https://ntfy.sh")
+    # Public-ish base URL of the app (e.g. the Tailscale https://….ts.net
+    # address) — used as the notification click-through target.
+    APP_URL: str = os.getenv("APP_URL", "")
+
     # Free-API integrations (all optional, all keyless)
     LATITUDE: str = os.getenv("LATITUDE", "")        # for Open-Meteo weather
     LONGITUDE: str = os.getenv("LONGITUDE", "")

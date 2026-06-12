@@ -22,6 +22,7 @@
 | `services/pdf.py` | fpdf2 PDF builder — latin-1 core fonts, entry markdown via `write_html` |
 | `services/embeddings.py` | Embed via Ollama, pack/unpack BLOBs, cosine search |
 | `services/brief.py` | Morning brief agent (weather + holidays + reminders + yesterday) |
+| `services/notify.py` | Phone push via ntfy.sh — best-effort, no-op without NTFY_TOPIC |
 | `services/external.py` | Keyless APIs: Open-Meteo, Nager.Date, ZenQuotes — all best-effort |
 | `services/calendar_stub.py` | Replace with Google Calendar / MS Graph |
 
