@@ -3,6 +3,22 @@
 Single-user, open-source diary app. Python end-to-end (no JavaScript authored
 by hand — only HTMX from CDN and a minimal service worker for PWA install).
 
+## Features
+
+- **Today** — brain-dump entries, AI polish + 1–5 mood scoring, topics,
+  reminders, "on this day" memories, morning brief (weather/holidays/agenda)
+- **Calendar** — month view with entry dots, reminders, holidays, mood emoji
+- **Topics** — six presets + custom; AI summaries per topic per period,
+  in-app and embedded in the topic PDF
+- **Review** — AI weekly reflection with a 7-day mood chart
+- **Coach** — monthly AI coaching that adapts to the month's mood data
+  (comfort after rough months, push after strong ones), quotes the user's
+  own entries, remembers who they are across months, follows up on its
+  previous challenge
+- **Ask** — RAG chat over all entries via embeddings
+- **PDF export** — any day, any month, any topic (with its AI summary), or
+  the complete archive, from `/export/`
+
 ## Stack
 
 - **Backend:** FastAPI + SQLAlchemy 2.0, SQLite (+ sqlite-vec when available)

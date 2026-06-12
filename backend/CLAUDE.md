@@ -16,7 +16,7 @@
 | `routers/calendar_view.py` | Month calendar: entries, reminders, holidays, moods |
 | `routers/review.py` | AI weekly review, cached per ISO week in Setting rows |
 | `routers/topics.py` | Topics page + per-topic AI summaries (cached per topic+period) |
-| `routers/coach.py` | Monthly AI coach: cached advice per month + persistent profile notes |
+| `routers/coach.py` | Monthly AI coach: mood-aware sessions, persistent profile, follow-ups |
 | `routers/export.py` | PDF downloads: `/export/{day,month,all,topic}` |
 | `services/ai.py` | Provider abstraction (`complete()`), polish/chat/mood/review/topic/coach prompts |
 | `services/pdf.py` | fpdf2 PDF builder — latin-1 core fonts, entry markdown via `write_html` |
@@ -43,6 +43,14 @@
   user, rewritten by the model after every session). Don't reuse these prefixes.
 - Preset topics (Work, Personal, Discovery, Growth, Failure, Struggle) are
   seeded idempotently by `database.init_db()`; custom topics come from the UI.
+- **The coach is deliberately not generic.** `routers/coach.py` computes the
+  month's emotional shape (`_mood_summary`: avg mood, rough/great days, trend)
+  and passes it plus last month's session into the prompt. The prompt contract:
+  comfort-first after rough months (no criticism), push harder after strong
+  ones, quote the user's own entries with dates, follow up on last month's
+  challenge. The profile memory has two parts — who they are, and "what lifts
+  them" (dated wins to recall on hard days). Preserve this contract when
+  touching coach prompts.
 - PDF exports must never 500 on content: `services/pdf.py` sanitizes
   everything to latin-1 (emoji are dropped) — keep it that way rather than
   adding font files.
