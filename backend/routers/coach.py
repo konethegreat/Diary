@@ -43,6 +43,42 @@ def _month_entries(db: Session, year: int, month: int) -> list[Entry]:
     )
 
 
+def _mood_summary(entries: list[Entry]) -> str:
+    """The emotional shape of the month, computed so the coach can set its
+    register (comfort vs. push) instead of guessing from prose."""
+    by_day: dict[date, list[int]] = {}
+    for e in entries:
+        if e.mood:
+            by_day.setdefault(e.entry_date, []).append(e.mood)
+    if not by_day:
+        return ""
+    day_avgs = {d: sum(m) / len(m) for d, m in sorted(by_day.items())}
+    avg = sum(day_avgs.values()) / len(day_avgs)
+    rough = [d for d, v in day_avgs.items() if v <= 2]
+    great = [d for d, v in day_avgs.items() if v >= 4]
+
+    lines = [
+        f"{len(day_avgs)} of the month's days have mood scores. Average {avg:.1f}/5.",
+        "Rough days (mood <= 2): "
+        + (", ".join(d.strftime("%B %d") for d in rough) if rough else "none"),
+        "Great days (mood >= 4): "
+        + (", ".join(d.strftime("%B %d") for d in great) if great else "none"),
+    ]
+    if len(day_avgs) >= 4:
+        days = list(day_avgs)
+        half = len(days) // 2
+        first = sum(day_avgs[d] for d in days[:half]) / half
+        second = sum(day_avgs[d] for d in days[half:]) / (len(days) - half)
+        trend = "improving" if second - first > 0.3 else "declining" if first - second > 0.3 else "steady"
+        lines.append(f"Trend across the month: {trend} (first half {first:.1f}, second half {second:.1f}).")
+    return "\n".join(lines)
+
+
+def _prev_session(db: Session, year: int, month: int) -> str:
+    prev_y, prev_m = (year - 1, 12) if month == 1 else (year, month - 1)
+    return _get(db, f"coach:{prev_y:04d}-{prev_m:02d}") or ""
+
+
 def _corpus(entries: list[Entry]) -> str:
     return "\n\n".join(
         f"[{e.entry_date.isoformat()}] {e.title}"
@@ -108,7 +144,11 @@ async def coach_session(request: Request, ym: str = Form(...), db: Session = Dep
     corpus = _corpus(entries)
     profile = _get(db, PROFILE_KEY) or ""
     try:
-        advice = await ai.coach_advice(db, profile, month_label, corpus)
+        advice = await ai.coach_advice(
+            db, profile, month_label, corpus,
+            mood_summary=_mood_summary(entries),
+            last_session=_prev_session(db, year, month),
+        )
     except Exception as exc:
         return fail(str(exc))
 

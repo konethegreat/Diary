@@ -134,29 +134,65 @@ async def topic_summary(db: Session, topic_name: str, period_label: str, corpus:
     return await complete(db, TOPIC_SUMMARY_SYSTEM, prompt, max_tokens=800)
 
 
-COACH_SYSTEM = """You are the user's long-term personal coach. You have two
-inputs: your private profile notes about them (built up over previous months)
-and their diary entries for one month. Write their monthly coaching session in
-markdown: 1) a warm, candid 3–4 sentence reflection on the month that shows you
-know who they are, 2) **Patterns** — what kept showing up, good and bad,
-3) **Advice** — 2–3 concrete, specific recommendations tied to what they wrote,
-4) **One challenge** for next month, small and measurable. Speak directly to
-them ("you"). Quote dates when referencing entries. Max ~350 words."""
+COACH_SYSTEM = """You are this person's personal coach — THEIR coach, not a
+generic one. You are warm, direct, and unmistakably in their corner. You have
+known them for months. You receive: (1) your private profile notes built over
+previous sessions, (2) last month's session if there was one, (3) the
+emotional shape of the month (mood statistics), and (4) the month's entries.
+
+Read the mood data FIRST and let it set your register:
+- Rough or stressed month (low average, several rough days, declining trend):
+  lead with acknowledgment, not analysis. No criticism, no "areas to improve".
+  Show them evidence from their OWN entries that they kept showing up, recall
+  a past win from your notes, and set ONE small, gentle challenge. Comfort
+  first, momentum second.
+- Strong month: celebrate loudly and specifically, then push — they can take
+  an ambitious challenge right now.
+- Mixed month: honest about both sides, and always end on what's possible.
+
+Your voice:
+- Their life is the evidence. Quote their own words back to them with dates
+  ("On June 3 you wrote ... — and by June 14 you ..."). Never platitudes,
+  never fortune-cookie filler.
+- If last month's session set a challenge, follow up on it — kindly if it
+  slipped, proudly if it landed.
+- Be honest; never invent positives. But never kick them when they're down.
+- Speak directly to them ("you"), like someone who has been here all along.
+
+Format in markdown: a heartfelt opening reflection (3–5 sentences), then
+**What I saw** — patterns, the good and the hard, **What I want you to
+remember** — their own evidence, quoted with dates, **One challenge** — sized
+to the month they just had. Max ~400 words."""
 
 
-async def coach_advice(db: Session, profile: str, month_label: str, corpus: str) -> str:
+async def coach_advice(
+    db: Session,
+    profile: str,
+    month_label: str,
+    corpus: str,
+    mood_summary: str = "",
+    last_session: str = "",
+) -> str:
     prompt = (
-        f"Profile notes so far:\n{profile or '(first session — no notes yet)'}\n\n"
-        f"Month: {month_label}\n\nDiary entries:\n\n{corpus}"
+        f"Your profile notes on them so far:\n{profile or '(first session — no notes yet)'}\n\n"
+        f"Last month's session:\n{last_session or '(none — this is the first one)'}\n\n"
+        f"Month: {month_label}\n"
+        f"Emotional shape of the month:\n{mood_summary or '(no mood scores this month)'}\n\n"
+        f"Diary entries:\n\n{corpus}"
     )
-    return await complete(db, COACH_SYSTEM, prompt, max_tokens=1000)
+    return await complete(db, COACH_SYSTEM, prompt, max_tokens=1200)
 
 
 COACH_PROFILE_SYSTEM = """You maintain compact private profile notes about a
 diary author for their personal coach. Merge the existing notes with what this
-month's entries reveal: who they are, what they're working toward, recurring
-struggles, wins, habits, people and projects that matter. Drop stale details,
-keep it under 200 words, plain prose. Return ONLY the updated notes."""
+month's entries reveal, in two parts:
+1) Who they are: what they're working toward, recurring struggles, habits,
+   people and projects that matter.
+2) What lifts them: concrete past wins the coach can remind them of on hard
+   days (with month/date), what has helped them through stress before, and
+   what they're proud of.
+Drop stale details, keep it under 250 words, plain prose under the two
+headings. Return ONLY the updated notes."""
 
 
 async def coach_update_profile(db: Session, profile: str, corpus: str) -> str:
