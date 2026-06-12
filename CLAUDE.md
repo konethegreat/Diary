@@ -47,16 +47,13 @@ Runs permanently on the owner's Windows laptop:
   at logon (no console; logs append to `data/server.log`). `--dev` enables
   uvicorn auto-reload for development; without it the server is headless.
 - **Tailscale** provides phone access: `tailscale serve` fronts
-  127.0.0.1:8000 at `diary.<tailnet>.ts.net` (device hostname "diary"). The
-  diary is never exposed to the public internet. Currently served over
-  plain HTTP within the tailnet (still WireGuard-encrypted in transit)
-  because ts.net ACME cert provisioning returns 500s from Tailscale's
-  control plane — an HTTPS serve config for port 443 is already in place
-  and will start working if/when `tailscale cert diary.<tailnet>.ts.net`
-  succeeds; then switch APP_URL in .env back to https. NOTE: requests
-  proxied by tailscale serve arrive from loopback, so AUTH_MODE=dev treats
-  the whole tailnet as the owner — fine while the tailnet is single-person;
-  switch to OAuth before inviting family.
+  127.0.0.1:8000 with HTTPS at `https://diary.<tailnet>.ts.net` (device
+  hostname "diary"; Let's Encrypt cert auto-renewed by tailscaled). The
+  diary is never exposed to the public internet — serve is tailnet-only,
+  Funnel is off and must stay off. Session cookies are Secure-flagged;
+  HSTS is emitted (scheme arrives via X-Forwarded-Proto). NOTE: with
+  TRUST_TAILNET=true + AUTH_MODE=dev every tailnet device is the owner —
+  fine while the tailnet is single-person; switch to OAuth before family.
 - **Push notifications** via ntfy.sh (`backend/services/notify.py`):
   morning brief at BRIEF_HOUR and a coach nudge at 18:00 on the last day of
   the month. `NTFY_TOPIC` in `.env` is the secret; `APP_URL` is the ts.net
