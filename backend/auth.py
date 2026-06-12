@@ -8,6 +8,8 @@ AUTH_MODE="dev" bypasses OAuth for local development only. It is honored
 ONLY for requests arriving from loopback — if the app is ever exposed while
 misconfigured, remote clients still hit the OAuth wall.
 """
+import ipaddress
+
 from authlib.integrations.starlette_client import OAuth, OAuthError
 from fastapi import APIRouter, HTTPException, Request
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -33,9 +35,36 @@ PUBLIC_PREFIXES = ("/static/",)
 
 _LOOPBACK = {"127.0.0.1", "::1", "localhost", "testclient"}
 
+# Tailscale's address ranges (CGNAT v4 + their ULA v6). Only consulted when
+# TRUST_TAILNET is on: tailscale serve proxies via loopback but uvicorn
+# rewrites request.client from X-Forwarded-For, so tailnet peers show up
+# with these addresses.
+_TAILNET_NETS = (
+    ipaddress.ip_network("100.64.0.0/10"),
+    ipaddress.ip_network("fd7a:115c:a1e0::/48"),
+)
+
 
 def _is_local(request: Request) -> bool:
-    return request.client is not None and request.client.host in _LOOPBACK
+    """Loopback always; the owner's tailnet too when TRUST_TAILNET=true.
+
+    Trusting the tailnet means every device on it is treated as the owner
+    under AUTH_MODE=dev — only sane while the tailnet is single-person.
+    Spoofing is not a concern: the app binds loopback-only and uvicorn only
+    honors X-Forwarded-For from loopback peers (tailscale serve itself).
+    """
+    if request.client is None:
+        return False
+    host = request.client.host
+    if host in _LOOPBACK:
+        return True
+    if not settings.TRUST_TAILNET:
+        return False
+    try:
+        ip = ipaddress.ip_address(host)
+    except ValueError:
+        return False
+    return any(ip in net for net in _TAILNET_NETS)
 
 
 class GatekeeperMiddleware(BaseHTTPMiddleware):

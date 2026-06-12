@@ -14,6 +14,10 @@ class Settings:
 
     SECRET_KEY: str = os.getenv("SECRET_KEY", "")
     AUTH_MODE: str = os.getenv("AUTH_MODE", "oauth")  # "oauth" | "dev"
+    # Treat the owner's Tailscale network like loopback for AUTH_MODE=dev:
+    # every tailnet device is auto-logged-in as the owner. Enable ONLY while
+    # the tailnet contains nobody else's devices.
+    TRUST_TAILNET: bool = os.getenv("TRUST_TAILNET", "").strip().lower() in ("1", "true", "yes")
 
     GOOGLE_CLIENT_ID: str = os.getenv("GOOGLE_CLIENT_ID", "")
     GOOGLE_CLIENT_SECRET: str = os.getenv("GOOGLE_CLIENT_SECRET", "")

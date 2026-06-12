@@ -72,7 +72,11 @@ Runs permanently on the owner's Windows laptop:
    `.env` or `data/`. There is deliberately no `.env.example` — config.py
    documents every variable and fails fast on missing/insecure values.
 3. **AUTH_MODE=dev** auto-logs-in the owner, and is honored ONLY for loopback
-   connections (see `auth._is_local`) — remote clients always hit OAuth.
+   connections — plus the owner's Tailscale ranges when `TRUST_TAILNET=true`
+   (see `auth._is_local`; tailscale serve forwards the peer's tailnet IP via
+   X-Forwarded-For, which uvicorn applies). All other clients always hit
+   OAuth. TRUST_TAILNET is only sane while the tailnet is single-person —
+   turn it off and switch to OAuth before inviting family.
 4. **Security headers** (CSP, frame-deny, nosniff, HSTS-on-https) are attached
    by the gatekeeper middleware to every response, including public paths.
    htmx is the only external script, SRI-pinned to unpkg.
