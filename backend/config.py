@@ -37,6 +37,10 @@ class Settings:
     # anyone who knows it can read the notifications — use a long random name.
     NTFY_TOPIC: str = os.getenv("NTFY_TOPIC", "")
     NTFY_SERVER: str = os.getenv("NTFY_SERVER", "https://ntfy.sh")
+    # Notifications go through the ntfy server in plaintext (TLS in transit,
+    # but readable by the server and anyone holding the topic name). Default:
+    # send only a generic "ready" ping; opt in to include diary content.
+    NTFY_SEND_CONTENT: bool = os.getenv("NTFY_SEND_CONTENT", "").strip().lower() in ("1", "true", "yes")
     # Public-ish base URL of the app (e.g. the Tailscale https://….ts.net
     # address) — used as the notification click-through target.
     APP_URL: str = os.getenv("APP_URL", "")

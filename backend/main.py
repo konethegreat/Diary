@@ -25,7 +25,8 @@ async def _scheduled_brief() -> None:
     db = SessionLocal()
     try:
         content = await brief_service.generate(db, force=True)
-        await notify.push("Morning brief", content, click_path="/", tags="sunny")
+        body = content if settings.NTFY_SEND_CONTENT else "Your morning brief is ready - tap to read it."
+        await notify.push("Morning brief", body, click_path="/", tags="sunny")
     except Exception:
         pass  # provider offline — UI will generate on demand
     finally:
@@ -66,7 +67,10 @@ app.add_middleware(
     secret_key=settings.SECRET_KEY,
     same_site="lax",
     max_age=60 * 60 * 24 * 30,  # 30 days
-    https_only=False,  # cookie Secure flag is added by the proxy when serving HTTPS
+    # Secure flag on: tailscale serve terminates TLS. http://localhost still
+    # works — browsers accept Secure cookies on localhost, and AUTH_MODE=dev
+    # re-establishes the session on every loopback request anyway.
+    https_only=True,
 )
 
 app.mount("/static", StaticFiles(directory=str(settings.STATIC_DIR)), name="static")

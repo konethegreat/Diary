@@ -22,3 +22,8 @@ venv/
 Thumbs.db
 .vscode/
 .idea/
+
+# TLS material must never enter the repo
+*.crt
+*.key
+*.pem
