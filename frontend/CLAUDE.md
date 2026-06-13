@@ -34,9 +34,16 @@ Motion follows Emil Kowalski's design-engineering principles:
 
 - **All interactivity is HTMX attributes** (`hx-post`, `hx-target`,
   `hx-swap`). Do not add `<script>` blocks; the only JS is `static/init.js`
-  (one-line SW registration — kept as a file so CSP stays strict) and
-  `static/sw.js`. htmx is SRI-pinned; bumping its version means updating
-  both the URL and integrity hash in base.html AND the CSP in auth.py.
+  (SW registration + two tiny htmx helpers — kept as a file so CSP stays
+  strict) and `static/sw.js`. htmx is SRI-pinned; bumping its version means
+  updating both the URL and integrity hash in base.html AND the CSP in auth.py.
+- **No eval'd htmx.** The CSP has no `'unsafe-eval'`, so htmx features that
+  evaluate strings as JS are blocked: do NOT use `hx-on`, `hx-vals='js:…'`,
+  or event filters like `hx-trigger="keyup[key=='Enter']"`. Instead:
+  - reset a form after a successful request → add `data-reset` to the `<form>`
+  - fire a request on Enter → `hx-trigger="enter-trigger"` + `data-enter-trigger`
+  Both are wired by delegated listeners in `init.js`; add new such behaviors
+  there (CSP-safe), never as inline attributes. Plain JSON `hx-vals` is fine.
 - Theme toggle: POST `/api/theme` flips a cookie and returns `HX-Refresh` —
   no client-side theme logic exists or should exist.
 - Server returns partials; a partial must render standalone with only the

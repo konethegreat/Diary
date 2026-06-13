@@ -14,7 +14,7 @@
 <div id="chat-log" class="chat-log"></div>
 
 <form class="chat-form" hx-post="/api/chat" hx-target="#chat-log" hx-swap="beforeend"
-      hx-on::after-request="if(event.detail.successful) this.reset()">
+      data-reset>
   <input name="question" required autocomplete="off" placeholder="Ask anything about your past entries…">
   <button class="btn-busy">Ask <span class="htmx-indicator spinner"></span></button>
 </form>
