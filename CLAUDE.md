@@ -1,7 +1,8 @@
 # Diary — AI-Augmented Personal Life Log
 
-Single-user, open-source diary app. Python end-to-end (no JavaScript authored
-by hand — only HTMX from CDN and a minimal service worker for PWA install).
+Single-user, source-available (noncommercial — PolyForm Noncommercial 1.0.0,
+see LICENSE.md) diary app. Python end-to-end (no JavaScript authored by hand —
+only HTMX from CDN and a minimal service worker for PWA install).
 
 ## Features
 
