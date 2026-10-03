@@ -100,6 +100,25 @@ CSP, tailnet-only deployment, and fail-fast configuration — is documented in
 
 ## License & contributing
 
+### Development checks
+
+Install `requirements-dev.txt` in your virtual environment, then run:
+
+```bash
+python -m pip install -r requirements-dev.txt
+python -m pytest -q
+```
+
+The tests use a temporary SQLite database and mocked HTTP services. They cover
+startup configuration, access controls, provider selection, AI data flows,
+notifications, and scheduled jobs without using your diary or API credentials.
+GitHub Actions runs the suite for pull requests and pushes to `main`.
+
+Passing these tests verifies the mocked workflows; a configured Google OAuth,
+Ollama, Anthropic, or ntfy instance still needs its own live check.
+
+### Terms
+
 - **License:** [LICENSE.md](LICENSE.md) — PolyForm Noncommercial 1.0.0
   (noncommercial use only; copyright © 2026 Kone Tshivhinda).
 - **Contributors:** [CONTRIBUTORS.md](CONTRIBUTORS.md).
