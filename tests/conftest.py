@@ -69,6 +69,8 @@ class FakeNetwork:
         self.requests: list[httpx.Request] = []
         self.unexpected: list[str] = []
         self.ollama_up = True
+        # Optional ``callable(request) -> bool``; True answers with HTTP 500.
+        self.fail = None
         self.holidays: list[dict] = []
         # (keyword in the embedded text, vector); first match wins.
         self.embed_rules: list[tuple[str, list[float]]] = []
@@ -101,6 +103,8 @@ class FakeNetwork:
     # -- the transport handler ------------------------------------------
     def handler(self, request: httpx.Request) -> httpx.Response:
         self.requests.append(request)
+        if self.fail is not None and self.fail(request):
+            return httpx.Response(500, text="simulated failure")
         host, path = request.url.host, request.url.path
         if host == "api.anthropic.com" and path == "/v1/messages":
             body = self.json_body(request)
