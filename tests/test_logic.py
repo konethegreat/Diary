@@ -99,9 +99,11 @@ def test_mood_summary_averages_per_day_and_names_rough_and_great_days():
         ([4, 4, 2, 2], "declining (first half 4.0, second half 2.0)"),
         ([3, 4, 4, 3], "steady (first half 3.5, second half 3.5)"),
         ([2, 2, 2, 4, 4], "improving (first half 2.0, second half 3.3)"),  # odd number of days
+        ([3, 3, 3, 3, 3, 3, 4], "steady (first half 3.0, second half 3.2)"),  # a rise of 0.25 is noise
+        ([3, 3, 3, 4, 3, 3, 3, 3], "steady (first half 3.2, second half 3.0)"),  # so is a fall of 0.25
     ],
 )
-def test_mood_summary_reports_a_trend_from_four_scored_days(moods, trend):
+def test_mood_summary_reports_a_trend_from_four_or_more_scored_days(moods, trend):
     entries = [scored(date(2026, 3, day), mood) for day, mood in enumerate(moods, start=1)]
 
     assert coach._mood_summary(entries).splitlines()[-1] == f"Trend across the month: {trend}."
